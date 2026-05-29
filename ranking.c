@@ -1,83 +1,82 @@
 #include "ranking.h"
 #include <stdio.h>
 
-// Aqui eu abro o arquivo de texto para ler os recordes salvos quando o jogo inicia
-void carregar_recordes(int recordes[]) {
-    // Tento abrir o arquivo "recordes.txt" no modo de leitura ("r")
+// abro o arquivo de texto para ler os recordes salvos quando o jogo inicia
+void carregar_recordes(SnakeGame* game) {
+    // abro o arquivo "recordes.txt" (leitura)
     FILE* arq = fopen("recordes.txt", "r");
     
-    // Se o arquivo não existir (como na primeira vez que o jogo roda), 
-    // eu preencho todas as posições do ranking com zero
+    // se o arquivo não existir (como na primeira vez que o jogo roda)
+    // preencho todas as posições do ranking com zero
     if (arq == NULL) {
         for (int i = 0; i < MAX_RECORDES; i++) {
-            recordes[i] = 0;
+            game->recordes[i] = 0;
         }
-        return; // Encerro a função por aqui já que não há arquivo para ler
+        return; // Encerro a função por aqui (se nao tiver arquivo pra ler)
     }
     
-    // Se o arquivo existir, eu uso este laço para ler os 5 números guardados 
-    // dentro dele e os coloco direto no vetor de recordes do jogo
+    // se o arquivo existir, eu uso este laço para ler os 5 números guardados
     for (int i = 0; i < MAX_RECORDES; i++) {
-        if (fscanf(arq, "%d", &recordes[i]) != 1) {
-            recordes[i] = 0; // Se houver algum erro ou linha vazia, garanto que fica 0
+        if (fscanf(arq, "%d", &game->recordes[i]) != 1) {
+            game->recordes[i] = 0; // se houver algum erro ou linha vazia, garanto que fique 0
         }
     }
     
-    // Sempre fecho o arquivo depois de usar para liberar a memória do sistema
+    // sempre fecho o arquivo depois de usar para liberar a memória do sistema
     fclose(arq);
 }
 
-// Aqui eu salvo as pontuações atualizadas de volta no arquivo de texto
-void salvar_recordes(int recordes[]) {
-    // Abro ou crio o arquivo "recordes.txt" no modo de escrita ("w")
+// aqui eu salvo as pontuações atualizadas de volta no arquivo de texto
+void salvar_recordes(SnakeGame* game) {
+    // abro ou crio o arquivo "recordes.txt" no modo de escrita ("w")
     FILE* arq = fopen("recordes.txt", "w");
-    if (arq == NULL) return; // Se der algum erro ao criar o arquivo, saio da função
+    if (arq == NULL) return; // se der algum erro ao criar o arquivo, saio da função
     
-    // Escrevo os 5 recordes atuais no arquivo, colocando um número por linha (\n)
+    // escrevo os 5 recordes atuais no arquivo, colocando um número por linha (\n)
     for (int i = 0; i < MAX_RECORDES; i++) {
-        fprintf(arq, "%d\n", recordes[i]);
+        fprintf(arq, "%d\n", game->recordes[i]);
     }
     
-    // Fecho o arquivo para garantir que os dados sejam gravados fisicamente no HD
+    // Fecho o arquivo para garantir que os dados sejam gravados
     fclose(arq);
 }
 
-// Meu algoritmo de ordenação (Bubble Sort) para organizar o ranking
+// bubblesort para organizar o ranking
 void ordenar_recordes(int arr[], int n) {
-    // Uso dois laços "for" para percorrer o vetor e comparar os números de dois em dois
+    // dois laços "for" para percorrer o vetor e comparar os números de dois em dois
     for (int i = 0; i < n - 1; i++) {
         for (int j = 0; j < n - i - 1; j++) {
-            // Se o número da esquerda for MENOR que o número da direita, eu faço eles trocarem de lugar.
-            // Faço isso para garantir a ordem DECRESCENTE (os maiores placares ficam no topo).
+            // Se o número da esquerda for MENOR que o número da direita, eu faço eles trocarem de lugar
+            // para garantir a ordem DECRESCENTE (os maiores placares ficam em cima)
             if (arr[j] < arr[j + 1]) { 
-                int temp = arr[j];       // Guardo o valor da esquerda em uma variável temporária
-                arr[j] = arr[j + 1];     // Jogo o valor da direita para a esquerda
-                arr[j + 1] = temp;       // Coloco o valor que estava guardado na direita
+                int temp = arr[j];       // guardo o valor da esquerda em uma variável temporária
+                arr[j] = arr[j + 1];     // jogo o valor da direita para a esquerda
+                arr[j + 1] = temp;       // coloco o valor que estava guardado na direita
             }
         }
     }
 }
 
-// Meu algoritmo de busca (Busca Binária) para procurar um placar específico
+// busca binaria para procurar um placar específico (pra saber se empatou com alguma posição do ranking)
 int busca_binaria_recordes(int arr[], int n, int chave) {
     int inicio = 0;
     int fim = n - 1;
     
-    // Enquanto o meu espaço de busca não se fechar por completo
+    // enquanto o meu espaço de busca não se fechar por completo
     while (inicio <= fim) {
-        // Calculo onde fica o meio exato do vetor atual
+        // calculo onde fica o meio exato do vetor atual
         int meio = inicio + (fim - inicio) / 2;
         
-        // Se a pontuação que está no meio for igual ao meu placar atual, eu encontrei o que queria!
-        if (arr[meio] == chave) return meio; // Retorno o índice da posição encontrada (0 a 4)
+        // se a pontuação que está no meio for igual ao meu placar atual
+        if (arr[meio] == chave) return meio; // retorno o índice da posição encontrada (0 a 4)
         
-        // Como o meu vetor está organizado do maior para o menor (decrescente), inverto a lógica padrão:
+        // como o vetor está organizado do maior para o menor (decrescente), inverto a lógica
         if (arr[meio] < chave) {
-            fim = meio - 1;     // Se o meu placar é maior que o do meio, ele deve estar na metade esquerda
+            fim = meio - 1;     // se o meu placar é maior que o do meio, ele deve estar na metade esquerda
         } else {
-            inicio = meio + 1;  // Se o meu placar é menor que o do meio, ele deve estar na metade direita
+            inicio = meio + 1;  // se o meu placar é menor que o do meio, ele deve estar na metade direita
         }
     }
     
-    return -1; // Se o laço terminar e eu não achar nada, retorno -1 indicando que é uma pontuação inédita
+    return -1; // se o laço terminar e eu não achar nada, retorno -1 indicando que é uma pontuação inédita
 }
