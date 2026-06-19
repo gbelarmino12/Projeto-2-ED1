@@ -1,63 +1,83 @@
 #ifndef JOGO_H
 #define JOGO_H
 
-// módulos principais e os addons do allegro 
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_font.h>       
+#include <allegro5/allegro_image.h> 
 
-// constantes lógicas
 #define FALSE 0
 #define TRUE  1
-#define MAX_RECORDES 5 //
+#define MAX_RECORDES 5 
 
-// enumeração para controlar o estado atual das telas do jogo
+#define FPS 9.0             
+#define LARGURA_TELA 1280      
+#define ALTURA_TELA 720       
+#define BLOCO 40              
+#define TAMANHO_INICIAL_COBRA 3 
+
 enum ESTADO { MENU, JOGANDO, GAMEOVER };
 
-// struct para guardar qualquer coordenada X e Y na tela
 typedef struct {
     int x, y;
 } Ponto;
 
-// struct que representa cada pedaço/bloco do corpo da cobra
 typedef struct {
     Ponto posicao;
 } SnakeSegment;
 
-// struct principal que unifica e gerencia todo o estado do jogo
+typedef struct NodoObstaculo {
+    Ponto posicao;
+    struct NodoObstaculo* proximo;
+} NodoObstaculo;
+
 typedef struct {
-    SnakeSegment* corpo_cobra; // ponteiro para criar o vetor dinâmico da cobrinha
-    int tamanho_cobra;         // quantidade atual de blocos da cobra
-    int max_tamanho_alocado;   // limite atual de memória alocada no bloco de dados
+    SnakeSegment* corpo_cobra; 
+    int tamanho_cobra;         
+    int max_tamanho_alocado;   
 
-    Ponto comida;              // coordenadas X e Y da comida
-    int dx, dy;                // vetor de direção
-    int placar;                // pontuação obtida na partida atual
-    char placar_texto[50];     // string usada para formatar e exibir o score na tela
+    NodoObstaculo* lista_caixas;
 
-    int recordes[MAX_RECORDES]; // vetor do TOP 5 recordes carregados do arquivo
-    int encontrou_na_busca;     // guarda o índice da busca binária
+    Ponto comida;              
+    int dx, dy;                
+    int placar;                
+    char placar_texto[50];     
 
-    // ponteiros para gerenciar os elementos do allegro
+    int recordes[MAX_RECORDES]; 
+    int encontrou_na_busca;     
+
     ALLEGRO_DISPLAY* display;
     ALLEGRO_TIMER* timer;          
     ALLEGRO_EVENT_QUEUE* fila_eventos; 
     ALLEGRO_FONT* fonte;           
+
+    ALLEGRO_BITMAP* spr_grama;
+    ALLEGRO_BITMAP* spr_maca;
+    ALLEGRO_BITMAP* spr_caixa;
+    ALLEGRO_BITMAP* spr_cabeca_cima;
+    ALLEGRO_BITMAP* spr_cabeca_baixo;
+    ALLEGRO_BITMAP* spr_cabeca_esq;
+    ALLEGRO_BITMAP* spr_cabeca_dir;
+    ALLEGRO_BITMAP* spr_corpo_horiz;
+    ALLEGRO_BITMAP* spr_corpo_vert;
+    ALLEGRO_BITMAP* spr_corpo_ce; 
+    ALLEGRO_BITMAP* spr_corpo_cd; 
+    ALLEGRO_BITMAP* spr_corpo_be; 
+    ALLEGRO_BITMAP* spr_corpo_bd; 
+    ALLEGRO_BITMAP* spr_rabo_cima;
+    ALLEGRO_BITMAP* spr_rabo_baixo;
+    ALLEGRO_BITMAP* spr_rabo_esq;
+    ALLEGRO_BITMAP* spr_rabo_dir;
+
 } SnakeGame;
 
-// constantes de configuração do jogo
-#define FPS 9.0             
-#define LARGURA_TELA 640      
-#define ALTURA_TELA 480       
-#define BLOCO 40             
-#define TAMANHO_INICIAL_COBRA 3
-
-// declaração das funções
 SnakeGame* criar_jogo();
 void destruir_jogo(SnakeGame* game);
 void resetar_jogo(SnakeGame* game);
 int mover_cobra(SnakeGame* game);
 void desenhar_jogo(SnakeGame* game);
 void atualizar_placar(SnakeGame* game);
+void adicionar_caixa(SnakeGame* game);
+void liberar_caixas(SnakeGame* game);
 
 #endif
